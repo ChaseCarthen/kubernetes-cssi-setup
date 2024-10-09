@@ -1,0 +1,6 @@
+helm show values timescale/tobs > my_values.yaml
+https://docs.timescale.com/self-hosted/latest/install/installation-kubernetes/
+kubectl cp -n thingstack ./dump.bak testdb-0:/home/postgres/dump.bak
+
+# https://github.com/imusmanmalik/cloudnative-pg-timescaledb-postgis-containers
+# https://github.com/Atos-Research-and-Innovation/IoTagent-LoRaWAN/tree/master/examples/dummy-devices

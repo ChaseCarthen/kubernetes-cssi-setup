@@ -1,0 +1,3 @@
+I installed racnher on the kubernetes cluster based on a set of instructions from: https://ranchermanager.docs.rancher.com/getting-started/installation-and-upgrade
+
+I have attached the values yaml that was produced for the output.

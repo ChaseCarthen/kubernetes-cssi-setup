@@ -1,0 +1,12 @@
+USER-SUPPLIED VALUES:
+bootstrapPassword: admin
+hostname: ncar-da-15.rc.unr.edu
+ingress:
+  enabled: true
+  hosts:
+    - host: ncar-da-15.rc.unr.edu
+      paths:
+        - path: /rancher
+          pathType: prefix
+  extraAnnotations:
+    nginx.ingress.kubernetes.io/whitelist-source-range: 134.197.0.0/16,10.0.0.0/8

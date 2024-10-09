@@ -1,0 +1,19 @@
+apiVersion: acid.zalan.do/v1
+kind: postgresql
+metadata:
+  name: ttn-db
+  namespace: thingstack
+spec:
+  numberOfInstances: 2
+  postgresql:
+    version: "16"
+    parameters:
+      password_encryption: scram-sha-256
+  standby:
+    standby_host: 172.20.199.164
+    standby_port: "5432"
+  teamId: acid
+  volume:
+    size: 10Gi
+    storageClass: rook-ceph-block
+

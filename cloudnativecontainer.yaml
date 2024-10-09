@@ -1,0 +1,52 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: thingstackinstance
+  namespace: thingstack
+spec:
+  instances: 1
+  enableSuperuserAccess: True
+  imageName: ghcr.io/imusmanmalik/timescaledb-postgis:16 #ghcr.io/cloudnative-pg/postgis:16 
+  #ghcr.io/cloudnative-pg/postgis:14
+  #managed:
+  #  roles:
+  #  - name: root
+  #    ensure: prsent
+  #    superuser: true
+  #    login: true
+  #    passwordSecret:
+  #      name: root-credentials
+  bootstrap:
+    pg_basebackup:
+      source: cssi-db
+    #initdb:
+    #  postInitTemplateSQL:
+    #    - CREATE EXTENSION timescaledb;
+    #    - CREATE EXTENSION postgis;
+    #    - CREATE EXTENSION postgis_topology;
+    #    - CREATE EXTENSION fuzzystrmatch;
+    #    - CREATE EXTENSION postgis_tiger_geocoder;
+    #  import:
+    #    type: monolith
+    #    databases:
+    #      - postgres
+    #    source:
+    #      externalCluster: cssi-db
+  externalClusters:
+    - name: cssi-db
+      connectionParameters:
+        host: 172.20.199.164
+        user: cssi_replica_user
+        dbname: ttn_lorawan #postgres
+      password:
+        name: cssi-db
+        key: password
+  replica:
+    enabled: false
+    source: cssi-db 
+  postgresql:
+    shared_preload_libraries:
+      - timescaledb
+  storage:
+    storageClass: rook-ceph-block
+    size: 100Gi

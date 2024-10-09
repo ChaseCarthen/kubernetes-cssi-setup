@@ -1,0 +1,3 @@
+https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/generic-oauth/
+https://134.197.75.58/login/generic_oauth
+134.197.75.58

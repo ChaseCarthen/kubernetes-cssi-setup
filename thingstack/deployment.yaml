@@ -1,0 +1,130 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ttn-external-lw-stack
+  namespace: thingstack
+spec:
+  selector:
+    matchLabels:
+      app: ttn-external-lw-stack
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ttn-external-lw-stack
+      name: ttn-external-lw-stack
+    spec:
+      containers:
+        - name: flask
+          image: chasec2331/cssidatabackend
+          args:
+            - --host=0.0.0.0
+            - --port=5001
+          ports:
+            - name: flaskport
+              containerPort: 5001
+        - name: stack
+          args:
+            - start
+            - console
+          workingDir: /envs
+          command:
+            - ttn-lw-stack
+            - -c
+            - /config/ttn-lw-stack-docker-external.yaml
+          env:
+            #- name: TTN_LW_IS_DATABASE_URI
+            #  valueFrom:
+            #    configMapKeyRef:
+            #      name: db-config
+            #      key: db_uri
+            #- name: TTN_LW_IS_DATABASE_URI
+            #  value: postgres://root:root@172.20.199.164:5432/ttn_lorawan?sslmode=disable
+            #- name: TTN_LW_BLOB_LOCAL_DIRECTORY
+            #  value: /srv/ttn-lorawan/public/blob
+            #- name: TTN_LW_REDIS_ADDRESS
+            #  value: redis.thingstack.svc.cluster.local:6379
+            #- name: TTN_LW_CONSOLE_UI_AS_BASE_URL 
+            #  value: https://ncar-da-15.rc.unr.edu:30126/api/v3 
+            #- name: TTN_LW_CONSOLE_UI_IS_BASE_URL 
+            #  value: https://ncar-da-15.rc.unr.edu:30126/api/v3 
+            #- name: TTN_LW_OAUTH_SERVER_ADDRESS 
+            #  value: https://ncar-da-15.rc.unr.edu:30126/oauth
+            #- name: TTN_LW_IS_OAUTH_UI_CANONICAL_URL 
+            #  value: https://ncar-da-15.rc.unr.edu:30126/oauth
+            #- name: TTN_LW_IS_OAUTH_UI_IS_BASE_URL 
+            #  value: https://ncar-da-15.rc.unr.edu:30126/api/v3 
+            #- name: TTN_LW_APPLICATION_SERVER_GRPC_ADDRESS: mydomain:8884
+            #  value: 
+            #- name: TTN_LW_DEVICE_CLAIMING_SERVER_GRPC_ADDRESS: mydomain:8884
+            #  value:  
+          image: chasec2331/lorawan-stack-dev
+          ports:
+            - name: http
+              containerPort: 1885
+            - name: https
+              containerPort: 8885
+            - name: gwdata-mqttv2
+              containerPort: 1881
+            - name: gwdata-mqttsv2
+              containerPort: 8881
+            - name: gwdata-mqtt
+              containerPort: 1882
+            - name: gwdata-mqtts
+              containerPort: 8882
+            - name: appdata-mqtt
+              containerPort: 1883
+            - name: appdata-mqtts
+              containerPort: 8883
+            - name: grpc
+              containerPort: 1884
+            - name: grpcs
+              containerPort: 8884
+            - name: back-interfaces
+              containerPort: 8886
+            - name: lora-lns-ws
+              containerPort: 1887
+            - name: lora-lns-wss
+              containerPort: 8887
+            - name: semtech-fwd
+              containerPort: 1700
+              protocol: UDP
+          volumeMounts:
+            - mountPath: /srv/ttn-lorawan/public/blob
+              name: stack-blob
+            - mountPath: /envs
+              name: dotenv-extra
+                #subPath: .env.extra
+            - mountPath: /config
+              name: stack-config
+            - mountPath: /var/lib/certificates
+              name: stack-acme
+      hostAliases:
+        - hostnames:
+          - "ncar-da-15.rc.unr.edu"
+          ip: 134.197.75.58
+      volumes:
+        - name: stack-blob
+          persistentVolumeClaim:
+            claimName: stack-blob
+        - name: stack-config
+          configMap:
+            name: ttn-lw-stack-docker-external #ttn-lw-stack-config
+        - name: dotenv-extra
+          configMap:
+            name: dotenv-extra
+        - name: stack-acme
+          secret:
+            secretName: ttn-tls
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dotenv-extra
+  namespace: thingstack
+data:
+  .env.extra: |
+    FLASK_DATA_ENDPOINT=ncar-da-15.rc.unr.edu:30129/data
